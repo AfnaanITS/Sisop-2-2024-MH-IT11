@@ -29,14 +29,17 @@ void replace_string(char *file_path) {
             strncpy(malware, "[MALWARE]", 9);
             fprintf(fp_temp, "%s", buffer);
             fprintf(fp_log, "[%02d-%02d-%04d][%02d:%02d:%02d] Suspicious string at %s successfully replaced!\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, file_path);
+            sleep(15);
         } else if (spyware) {
             strncpy(spyware, "[SPYWARE]", 9);
             fprintf(fp_temp, "%s", buffer);
             fprintf(fp_log, "[%02d-%02d-%04d][%02d:%02d:%02d] Suspicious string at %s successfully replaced!\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, file_path);
+            sleep(15);
         } else if (ransomware) {
             strncpy(ransomware, "[RANSOMWARE]", 12);
             fprintf(fp_temp, "%s", buffer);
             fprintf(fp_log, "[%02d-%02d-%04d][%02d:%02d:%02d] Suspicious string at %s successfully replaced!\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, file_path);
+            sleep(15);
         } else {
             fprintf(fp_temp, "%s", buffer);
         }
@@ -49,7 +52,6 @@ void replace_string(char *file_path) {
     remove(file_path);
     rename(temp, file_path);
 }
-
 
 void search_directory(char *dir_path) {
     DIR *d;
@@ -69,7 +71,6 @@ void search_directory(char *dir_path) {
         closedir(d);
     }
 }
-
 
 int main(int argc, char *argv[]) {
     pid_t pid, sid;
