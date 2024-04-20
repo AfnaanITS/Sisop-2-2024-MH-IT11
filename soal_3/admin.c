@@ -23,14 +23,14 @@ typedef enum {
 } Mode;
 
 void list_proses(const char *username);
-void write_log(const char *program_name, const char *format, const char *status, ...);
+void write_log(const char *program_name, pid_t pid, const char *format, const char *status, ...);
 void monitor_daemon(const char *username);
 void kill_proses(const char *username);
 void handle_signal(int signal);
 
 Mode current_mode = MODE_STOP;
 
-void list_processes(const char *username) {
+void list_proses(const char *username) {
   pid_t pid = fork();
 
   if (pid < 0) {
@@ -66,9 +66,6 @@ void write_log(const char *program_name, pid_t pid, const char *format, const ch
     snprintf(log_entry, sizeof(log_entry), "[%02d:%02d:%02d]-[%04d-%02d-%02d]-[PID: %d]-[%s]",
              time_info->tm_hour, time_info->tm_min, time_info->tm_sec,
              time_info->tm_year + 1900, time_info->tm_mon + 1, time_info->tm_mday, pid, program_name);
-
-    vsnprintf(log_entry + strlen(log_entry), sizeof(log_entry) - strlen(log_entry), format, args);
-
     snprintf(log_entry + strlen(log_entry), sizeof(log_entry) - strlen(log_entry), "-%s", status);
 
     pid_t fork_pid = fork();
@@ -116,8 +113,8 @@ void monitor_daemon(const char *username) {
 
     while (current_mode == MODE_MONITOR) {
         list_proses(username);
-        write_log(getpid(), "Memantau proses pengguna %s", "JALAN", username);
-
+        write_log("admin", getpid(), "Memantau proses pengguna %s", "JALAN", username);
+        
         sleep(SLEEP_INTERVAL);
         alarm(SLEEP_INTERVAL);
     }
@@ -131,18 +128,18 @@ void kill_proses(const char *username) {
         return;
     }
 
-    if (pid == 0) { // Child process
+    if (pid == 0) {
         execlp("pkill", "pkill", "-KILL", "-u", username, NULL);
         perror("execlp");
         exit(EXIT_FAILURE);
-    } else { // Parent process
+    } else { 
         int status;
         waitpid(pid, &status, 0);
         if (WIFEXITED(status)) {
             if (WEXITSTATUS(status) == 0) {
-                write_log(getpid(), "Proses pengguna %s digagalkan", "JALAN", username);
+                write_log("admin", getpid(), "Proses pengguna %s digagalkan", "JALAN", username);
             } else {
-                write_log(getpid(), "Gagal menggagalkan proses pengguna %s", "GAGAL", username);
+                write_log("admin", getpid(), "Gagal menggagalkan proses pengguna %s", "GAGAL", username);
             }
         }
     }
@@ -152,9 +149,13 @@ void handle_signal(int signal) {
     if (signal == SIGALRM && current_mode == MODE_KILLPROSES) {
         kill_proses(getenv("USER"));
     } else if (signal == SIGINT) {
+        current_mode = MODE_STOP;
         if (current_mode == MODE_MONITOR) {
-            current_mode = MODE_STOP;
-            write_log(getpid(), "Memantau proses pengguna dihentikan", "GAGAL");
+            if (current_mode == MODE_STOP) {
+               write_log("admin", getpid(), "Memantau proses pengguna dihentikan", "GAGAL");
+            } else if (current_mode != MODE_STOP) {
+               write_log("admin", getpid(), "Memantau proses pengguna kembali dijalankan", "JALAN");
+            }
         } else {
             exit(EXIT_SUCCESS);
         }
@@ -204,10 +205,10 @@ int main(int argc, char *argv[]) {
         case MODE_STOP:
             if (strcmp(argv[1], "-s") == 0) {
                 current_mode = MODE_STOP;
-                write_log(getpid(), "Memantau proses pengguna dihentikan", "GAGAL");
+                write_log("admin", getpid(), "Memantau proses pengguna dihentikan", "GAGAL");
             } else if (strcmp(argv[1], "-a") == 0) {
                 current_mode = MODE_MONITOR;
-                write_log(getpid(), "Memantau proses pengguna kembali dijalankan", "JALAN");
+                write_log("admin", getpid(), "Memantau proses pengguna kembali dijalankan", "JALAN");
             }
             break;
         default:
