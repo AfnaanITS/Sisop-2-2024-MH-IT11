@@ -111,6 +111,8 @@ fprintf(fp_log, "[%02d-%02d-%04d][%02d:%02d:%02d] Suspicious string at %s succes
 # SOAL 2
 Dikerjakan oleh Rafi' Afnaan Fathurrahman (5027231040)
 Pengerjaan soal ini menggunakan 1 file .c
+MENGGUNAKAN KODE YANG TELAH DI REVISI:
+- Memperbaiki pembuatan file `history.log`
 ## management.c
 ## Subsoal a
 Atasannya meminta agar program tersebut dapat berjalan secara `daemon` dan dapat mengunduh serta melakukan unzip terhadap file berikut. Atasannya juga meminta program ini dibuat tanpa menggunakan command `system()`
